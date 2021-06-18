@@ -1,0 +1,287 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Ignite-C2_D1",
+    "description": "This is an user registration API",
+    "version":"1.0.0",
+    "contact": {
+      "email": "joey.felip11@gmail.com"
+    }
+  },
+  "paths": {
+    "/users": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a new user.",
+        "requestBody": {
+          "description": "Required parameters to create a new user.",
+          "required": "true",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "name": "Your Name",
+                  "email": "yourAccount@domain.com"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { 
+                  "$ref": "#/definitions/users/userObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email enviado na requisição já é utilizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Email já em uso!"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Users"],
+        "summary": "list all users",
+        "description": "List all users if request is done by an `ADMIN ACCOUNT`.",    
+        "parameters": [
+          {
+            "in": "header",
+            "required": true,
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "0bb616e9-4763-4e71-ad13-8de792c31149"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/users/otherUserObject" 
+                  }
+                }
+              }
+            }
+            
+          },
+          "400": {
+            "description": "ID enviado não pertence usuário adminstrador ou a um usuário cadastrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Usuário não existe ou não é administrador!"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "show an user profile.",
+        "parameters": [
+          {
+            "in": "path",
+            "required": "true",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "user_id - ID do usuário."
+            }
+          }  
+        ],
+        "responses":{
+          "201": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/users/userObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "properties": {
+                    "error": {
+                      "type":"string",
+                      "example": "User not found!"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_id}/admin": {
+      "patch": {
+        "tags": ["Users"],
+        "summary": "turn an user an admin account",
+        "parameters": [
+          {
+            "in": "path",
+            "required": "true",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "user_id - ID do usuário."
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/users/otherUserObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "user not found!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": {
+                    "properties": {
+                      "error": {
+                        "type": "string",
+                        "example": "Usuário não existe!"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "users": {    
+      "userObject": {
+        "type": "object",
+        "properties":{
+          "id": {
+            "type": "string",
+            "example": "93700d1b-4c5e-4811-8ad8-674057e2ca3b",
+            "description": "ID of the new user."
+          },
+          "admin": {
+            "type": "boolean",
+            "example": "true",
+            "description": "by default, new users are always non-admin accounts."
+          },
+          "name":{
+            "type": "string",
+            "example": "Your Name",
+            "description": "Name that came on the request body."
+          },
+          "email": {
+            "type": "string",
+            "example": "yourAccount@domain.com",
+            "description": "Email that came on the request body"
+          },
+          "created_at": {
+            "type": "data",
+            "example": "2021-06-13T21:56:46.517Z",
+            "description": "Data of user creation in UTC format."
+          },
+          "updated_at": {
+            "type": "data",
+            "example": "2021-06-13T21:56:46.517Z",
+            "description": "Data of when any update is done in the user account."
+          }
+        }
+      },
+      "otherUserObject": {
+        "type": "object",
+        "properties":{ 
+          "id": {
+            "type": "string",
+            "example": "0bb616e9-4763-4e71-ad13-8de792c31149",
+            "description": "ID of the new user."
+          },
+          "admin": {
+            "type": "boolean",
+            "example": "false",
+            "description": "by default, new users are always non-admin accounts."
+          },
+          "name":{
+            "type": "string",
+            "example": "Other Name",
+            "description": "Name that came on the request body."
+          },
+          "email": {
+            "type": "string",
+            "example": "otherAccount@domain.com",
+            "description": "Email that came on the request body"
+          },
+          "created_at": {
+            "type": "data",
+            "example": "2021-06-14T20:38:27.362Z",
+            "description": "Data of user creation in UTC format."
+          },
+          "updated_at": {
+            "type": "data",
+            "example": "2021-06-14T20:38:27.362Z",
+            "description": "Data of when any update is done in the user account."
+          }
+        }
+      }
+    }
+  }
+}
